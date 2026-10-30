@@ -26,7 +26,10 @@ await build({
   loader: { '.woff2': 'file', '.woff': 'file', '.ttf': 'file', '.wasm': 'file' },
   minify: true, target: 'chrome140', jsx: 'automatic',
   nodePaths: [resolve(appRoot, 'node_modules')],
-  alias: { '@pero/app-sdk/ui': resolve(sdk, 'ui.tsx'), '@pero/app-sdk/chart': resolve(sdk, 'chart.ts'), '@pero/app-sdk': resolve(sdk, 'index.tsx') },
+  // Shared SDK sources sit outside the App's dependency tree. Pin React and its
+  // renderer to the App so ancestor node_modules cannot create a second runtime.
+  alias: { react: resolve(appRoot, 'node_modules/react'), 'react-dom': resolve(appRoot, 'node_modules/react-dom'),
+    '@pero/app-sdk/ui': resolve(sdk, 'ui.tsx'), '@pero/app-sdk/chart': resolve(sdk, 'chart.ts'), '@pero/app-sdk': resolve(sdk, 'index.tsx') },
   plugins: [{ name: 'app-scoped-css', setup(builder) {
     builder.onLoad({ filter: /virtual-cell[\\/]ui-src[\\/]styles\.css$/ }, async args => ({ contents: await readFile(args.path, 'utf8'), loader: 'text' }));
   } }],
